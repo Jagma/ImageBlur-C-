@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace ImageBlur
 {
@@ -26,38 +27,52 @@ namespace ImageBlur
 
         private void btnBlur_Click(object sender, EventArgs e)
         {
-            Bitmap img = new Bitmap(pictureBox1.Image);
-            Bitmap blurPic = new Bitmap(img.Width, img.Height);
+            const int SCALE = 3; //Scale at which the image blurs for example 3x3
+            int NumOfThreads = (int)numThreads.Value;
+            Image image = pictureBox1.Image;
+            var bitmap = new Bitmap(image.Width, image.Height);
 
-            Int32 avgR = 0, avgG = 0, avgB = 0;
-            Int32 blurPixelCount = 0;
 
-            for (int y = 0; y < img.Height; y++)
+            using (var graphics = Graphics.FromImage(bitmap))
             {
-                for (int x = 0; x < img.Width; x++)
+                graphics.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height),
+                    new Rectangle(0, 0, image.Width, image.Height), GraphicsUnit.Pixel);
+            }
+            // Loop through the image with the SCALE cells.
+            for (var yy = 0; yy < image.Height && yy < image.Height; yy += SCALE)
+            {
+                for (var xx = 0; xx < image.Width && xx < image.Width; xx += SCALE)
                 {
-                    Color pixel = img.GetPixel(x, y);
-                    avgR += pixel.R;
-                    avgG += pixel.G;
-                    avgB += pixel.B;
+                    var cellColors = new List<Color>();
 
-                    blurPixelCount++;
+                    // Store each color from the scale cells into cellColors.
+                    for (var y = yy; y < yy + SCALE && y < image.Height; y++)
+                    {
+                        for (var x = xx; x < xx + SCALE && x < image.Width; x++)
+                        {
+                            cellColors.Add(bitmap.GetPixel(x, y));
+                        }
+                    }
+
+                    // Get the average red, green, and blue values.
+                    var averageRed = cellColors.Aggregate(0, (current, color) => current + color.R) / cellColors.Count;
+                    var averageGreen = cellColors.Aggregate(0, (current, color) => current + color.G) / cellColors.Count;
+                    var averageBlue = cellColors.Aggregate(0, (current, color) => current + color.B) / cellColors.Count;
+
+                    var averageColor = Color.FromArgb(averageRed, averageGreen, averageBlue);
+
+                    // Go BACK over the scale cells and set each pixel to the average color.
+                    for (var y = yy; y < yy + SCALE && y < image.Height; y++)
+                    {
+                        for (var x = xx; x < xx + SCALE && x < image.Width; x++)
+                        {
+                            bitmap.SetPixel(x, y, averageColor);
+                        }
+                    }
                 }
             }
-
-            avgR = avgR / blurPixelCount;
-            avgG = avgG / blurPixelCount;
-            avgB = avgB / blurPixelCount;
-
-            for (int y = 0; y < img.Height; y++)
-            {
-                for (int x = 0; x < img.Width; x++)
-                {
-                    blurPic.SetPixel(x, y, Color.FromArgb(avgR, avgG, avgB));
-                }
-            }
-
-            pictureBox2.Image = blurPic;
+            pictureBox2.Image = bitmap;
         }
+
     }
 }
