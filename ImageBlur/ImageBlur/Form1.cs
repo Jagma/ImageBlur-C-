@@ -8,11 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Threading;
 
 namespace ImageBlur
 {
     public partial class Form1 : Form
     {
+        Bitmap bitmap;
+
         public Form1()
         {
             InitializeComponent();
@@ -30,9 +34,28 @@ namespace ImageBlur
             const int SCALE = 3; //Scale at which the image blurs for example 3x3
             int NumOfThreads = (int)numThreads.Value;
             Image image = pictureBox1.Image;
-            var bitmap = new Bitmap(image.Width, image.Height);
 
+            Bitmap bitmap = new Bitmap(image.Width, image.Height);
+            Thread[] threads = new Thread[NumOfThreads];
 
+            /*  for(int i=0; i<NumOfThreads; i++)
+              {
+                  threads[0] = new Thread(() => getColours(SCALE, image, ref bitmap));
+                  threads[0].Start();
+              }*/
+            ThreadStart starter = () => getColours(SCALE, image, ref bitmap);  
+            Thread thread1 = new Thread(starter);
+            thread1.Start();
+            thread1.Join();
+            
+
+            pictureBox2.Image = bitmap;
+            pictureBox2.Image.Save(@"Z:\Users\Jagma\Desktop\Blurs\blur.jpeg", ImageFormat.Jpeg);
+
+        }
+
+        public static void getColours(int SCALE, Image image, ref Bitmap bitmap)
+        {
             using (var graphics = Graphics.FromImage(bitmap))
             {
                 graphics.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height),
@@ -41,6 +64,7 @@ namespace ImageBlur
             // Loop through the image with the SCALE cells.
             for (var yy = 0; yy < image.Height && yy < image.Height; yy += SCALE)
             {
+
                 for (var xx = 0; xx < image.Width && xx < image.Width; xx += SCALE)
                 {
                     var cellColors = new List<Color>();
@@ -71,7 +95,7 @@ namespace ImageBlur
                     }
                 }
             }
-            pictureBox2.Image = bitmap;
+         //   return bitmap;
         }
 
     }
