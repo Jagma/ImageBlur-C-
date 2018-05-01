@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ImageBlur.Properties
+namespace WindowsFormsApplication1.Properties
 {
 
 

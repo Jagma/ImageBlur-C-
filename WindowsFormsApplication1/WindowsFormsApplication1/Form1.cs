@@ -3,59 +3,73 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.Drawing.Imaging;
-using System.Threading;
 
-namespace ImageBlur
+namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        Bitmap bitmap;
-
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void btnUpload_Click(object sender, EventArgs e)
+        public Bitmap map { get; set; }
+        private int thrds = 4;
+
+        private void button1_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            if(ofd.ShowDialog()== DialogResult.OK)
-                pictureBox1.Image = Image.FromFile( ofd.FileName);
+            if (ofd.ShowDialog() == DialogResult.OK)
+                pictureBox1.Image =Image.FromFile(ofd.FileName);
+            map = (Bitmap)pictureBox1.Image;
+            button2.Enabled = true;
         }
 
-        private void btnBlur_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
-            const int SCALE = 3; //Scale at which the image blurs for example 3x3
-            int NumOfThreads = (int)numThreads.Value;
-            Image image = pictureBox1.Image;
+            thrds = (int)numericUpDown1.Value;
+            int SCALE = 3;
+            Bitmap[] parts = new Bitmap[thrds];
+            int size = map.Height / thrds;
+            int prt = 0;
+            //Splits the map into parts
+            for(int i=0; i<thrds;i++)
+            {
+                parts[i] = map.Clone(new Rectangle(0,(prt*size),map.Width,size),PixelFormat.DontCare);
+                prt++;
+            }
+            Graphics g = Graphics.FromImage(map);
+            g.Clear(Color.Black);
+            prt = 0;
+            int m = 0;
+            Thread[] threads = new Thread[thrds];
+            foreach(Bitmap b in parts)
+            {
+                threads[m] = new Thread(() => blurBlock(SCALE, b,b));
+                threads[m].Start();
+                m++;
+            }
 
-            Bitmap bitmap = new Bitmap(image.Width, image.Height);
-            Thread[] threads = new Thread[NumOfThreads];
-
-            /*  for(int i=0; i<NumOfThreads; i++)
-              {
-                  threads[0] = new Thread(() => getColours(SCALE, image, ref bitmap));
-                  threads[0].Start();
-              }*/
-            ThreadStart starter = () => getColours(SCALE, image, ref bitmap);  
-            Thread thread1 = new Thread(starter);
-            thread1.Start();
-            thread1.Join();
-            
-
-            pictureBox2.Image = bitmap;
-            pictureBox2.Image.Save(@"Z:\Users\Jagma\Desktop\Blurs\blur.jpeg", ImageFormat.Jpeg);
-
+            foreach (Thread t in threads)
+                t.Join();
+            foreach (Bitmap s in parts)
+            {
+                 g.DrawImage(s, new Point(0, prt*size));
+                 s.Dispose();
+                 prt++;
+            }
+            MessageBox.Show(map.GetPixel(5,5).A.ToString());
+            pictureBox2.Image = (Image)map;
+            map.Save(@"image.png", ImageFormat.Png);
         }
-
-        public static void getColours(int SCALE, Image image, ref Bitmap bitmap)
-        {
+        
+        private static void blurBlock(int SCALE, Image image , Bitmap bitmap) {
             using (var graphics = Graphics.FromImage(bitmap))
             {
                 graphics.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height),
@@ -95,8 +109,12 @@ namespace ImageBlur
                     }
                 }
             }
-         //   return bitmap;
+            //   return bitmap;
         }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            button2.Enabled = false;
+        }
     }
 }
