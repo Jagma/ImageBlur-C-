@@ -36,6 +36,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.btnBench = new System.Windows.Forms.Button();
+            this.pgrBar = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
@@ -61,7 +64,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(297, 271);
+            this.button1.Location = new System.Drawing.Point(208, 271);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -71,7 +74,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(538, 271);
+            this.button2.Location = new System.Drawing.Point(449, 271);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(88, 23);
             this.button2.TabIndex = 3;
@@ -81,7 +84,7 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(485, 274);
+            this.numericUpDown1.Location = new System.Drawing.Point(396, 274);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             64,
             0,
@@ -104,7 +107,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(378, 276);
+            this.label1.Location = new System.Drawing.Point(289, 276);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(101, 13);
             this.label1.TabIndex = 5;
@@ -128,11 +131,41 @@
             this.label3.TabIndex = 7;
             this.label3.Text = "Blur Image:";
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(543, 271);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(96, 23);
+            this.button3.TabIndex = 8;
+            this.button3.Text = "SmartBlur";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // btnBench
+            // 
+            this.btnBench.Location = new System.Drawing.Point(645, 271);
+            this.btnBench.Name = "btnBench";
+            this.btnBench.Size = new System.Drawing.Size(75, 23);
+            this.btnBench.TabIndex = 9;
+            this.btnBench.Text = "Benchmark";
+            this.btnBench.UseVisualStyleBackColor = true;
+            this.btnBench.Click += new System.EventHandler(this.btnBench_Click);
+            // 
+            // pgrBar
+            // 
+            this.pgrBar.Location = new System.Drawing.Point(726, 271);
+            this.pgrBar.Name = "pgrBar";
+            this.pgrBar.Size = new System.Drawing.Size(152, 23);
+            this.pgrBar.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(890, 306);
+            this.Controls.Add(this.pgrBar);
+            this.Controls.Add(this.btnBench);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -162,6 +195,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btnBench;
+        private System.Windows.Forms.ProgressBar pgrBar;
     }
 }
 
