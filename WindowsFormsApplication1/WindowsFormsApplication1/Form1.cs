@@ -75,11 +75,51 @@ namespace WindowsFormsApplication1
             map.Save(@"image.png", ImageFormat.Png);
         }
 
+        private void blurImage(int thrd, bool fnl)
+        {
+            if (pictureBox2.Image != null)
+                pictureBox2.Image = null;
+            Bitmap[] parts = new Bitmap[thrds];
+            int size = map.Height / thrds;
+            int prt = 0;
+            int fnlSize = map.Height - ((thrds - 1) * size);
+            //Splits the map into parts
+            for (int i = 0; i < thrds-1; i++)
+            {
+                parts[i] = map.Clone(new Rectangle(0, (prt * size), map.Width, size), PixelFormat.DontCare);
+                prt++;
+            }
+            parts[parts.Length-1] = map.Clone(new Rectangle(0, (prt * size), map.Width, fnlSize), PixelFormat.DontCare);
+            Graphics g = Graphics.FromImage((Image)map);
+            g.Clear(Color.LawnGreen);
+            prt = 0;
+            int m = 0;
+            Thread[] threads = new Thread[thrds];
+            foreach (Bitmap b in parts)
+            {
+                threads[m] = new Thread(() => blurBlock(SCALE, b, b));
+                threads[m].Start();
+                m++;
+            }
+
+            foreach (Thread t in threads)
+                t.Join();
+            foreach (Bitmap s in parts)
+            {
+                g.DrawImage(s, new Point(0, prt * size));
+                s.Dispose();
+                prt++;
+            }
+            pictureBox2.Image = (Image)map;
+            map.Save(@"image.png", ImageFormat.Png);
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
             map = (Bitmap)pictureBox1.Image;
             thrds = (int)numericUpDown1.Value;
-            blurImage(thrds);
+            //blurImage(thrds);
+            blurImage(thrds, true);
         }
         
         private static void blurBlock(int SCALE, Image image , Bitmap bitmap) {
@@ -160,12 +200,11 @@ namespace WindowsFormsApplication1
             txt.WriteLine("Benchmark for:" +map.Width+"x"+map.Height);
             for(int i=1; i<=MAX_THREADS; i++)
             {
-                Thread.Sleep(60);
                 watch.Reset();
                 watch.Start();
-                blurImage(i);
+                blurImage(i, true);
                 watch.Stop();
-                txt.WriteLine("Thread{0}: {1}s", i.ToString(), watch.Elapsed.TotalSeconds);
+                txt.WriteLine("Thread{0}: {1}ms", i.ToString(), watch.Elapsed.TotalMilliseconds);
                 pgrBar.Value = (int)Math.Round(((double)i / MAX_THREADS) * 100);
             }
             MessageBox.Show("Benchmark saved in: " + BENCHFILE);
